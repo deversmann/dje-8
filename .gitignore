@@ -1,0 +1,8 @@
+# macOS Files
+.DS_Store
+
+# KiCad Files
+\#auto_saved_files\#
+_autosave*.kicad_sch
+~*.kicad_sch.lck
+
