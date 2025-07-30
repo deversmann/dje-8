@@ -7,34 +7,107 @@ import (
 
 func BuildUcode() []Control {
 
-	ControlROM := [16][16]Control{
-		{CO2 | MI2, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                   // NOP
-		{CO2 | MI2, RO | II | CU, CO2 | MI2, RO2 | MI2 | CU2, RO | AI | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                   // LDA
-		{CO2 | MI2, RO | II | CU, CO2 | MI2, RO2 | MI2 | CU2, RO | BI, AU3 | AI | FL | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},       // ADD
-		{CO2 | MI2, RO | II | CU, CO2 | MI2, RO2 | MI2 | CU2, RO | BI, AU3 | AU0 | AI | FL | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // SUB
-		{CO2 | MI2, RO | II | CU, CO2 | MI2, RO2 | MI2 | CU2, RI | AO | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                   // STA
-		{CO2 | MI2, RO | II | CU, CO2 | MI2, RO | AI | CU | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                            // LDI
-		{CO2 | MI2, RO | II | CU, CO2 | MI2, RO2 | CI2 | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                               // JMP
-		{CO2 | MI2, RO | II | CU, CU2 | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                             // JC
-		{CO2 | MI2, RO | II | CU, CU2 | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                             // JZ
-		{CO2 | MI2, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                   // ---
-		{CO2 | MI2, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                   // ---
-		{CO2 | MI2, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                   // ---
-		{CO2 | MI2, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                   // ---
-		{CO2 | MI2, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                   // ---
-		{CO2 | MI2, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                                   // OUT
-		{CO2 | MI2, RO | II | CU, HLT | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                                             // HLT
+	ControlROM := [80][16]Control{
+		/* NOP */ {COW | MIW, RO | II | CU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* STOA */ {COW | MIW, RO | II | CU, COW | MIW, ROW | MIW | CUW, RI | AO | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* STOZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* STOM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* LODI */ {COW | MIW, RO | II | CU, COW | MIW, RO | AI | CU | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* LODA */ {COW | MIW, RO | II | CU, COW | MIW, ROW | MIW | CUW, RO | AI | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* LODZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* LODM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* NEG */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ASL */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ASR */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* NOT */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* LSL */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* LSR */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ROL */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ROR */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* ADDI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ADDA */ {COW | MIW, RO | II | CU, COW | MIW, ROW | MIW | CUW, RO | BI, AU3 | AI | FL | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ADDZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ADDM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SUBI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SUBA */ {COW | MIW, RO | II | CU, COW | MIW, ROW | MIW | CUW, RO | BI, AU3 | AU0 | AI | FL | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SUBZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SUBM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* ADCI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ADCA */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ADCZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ADCM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SBCI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SBCA */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SBCZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* SBCM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* ANDI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ANDA */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ANDZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ANDM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ORI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ORA */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ORZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* ORM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* XORI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* XORA */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* XORZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* XORM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* CMPI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* CMPA */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* CMPZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* CMPM */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* BEQ */ {COW | MIW, RO | II | CU, CUW | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // TODO currently absolute, make 8-bit relative
+		/* BNE */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* BCS */ {COW | MIW, RO | II | CU, CUW | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // TODO currently absolute, make 8-bit relative
+		/* BCC */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* BMI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* BPL */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* BVS */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* BVC */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* SEI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* JMP */ {COW | MIW, RO | II | CU, COW | MIW, ROW | CIW | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* JMPZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* JSR */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* JSRZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RTS */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* INT */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RTI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* CLZ */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV1 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* CLC */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV2 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* CLN */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV3 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* CLV */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV4 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+		/* CLI */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV5 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV6 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV7 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* RSV8 */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* PUSH */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* POP */ {COW | MIW, RO | II | CU, STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		/* HALT */ {COW | MIW, RO | II | CU, HLT | STR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 
 	var Ucode [65536]Control
 
 	for i := range 16 {
 		for j, Instr := range ControlROM {
-			if i&int(CarryFlagC) != 0 && j == 7 {
-				Instr = ControlROM[6]
+			if i&int(CarryFlagC) != 0 && j == int(BCS) {
+				Instr = ControlROM[JMP]
 			}
-			if i&int(ZeroFlagZ) != 0 && j == 8 {
-				Instr = ControlROM[6]
+			if i&int(ZeroFlagZ) != 0 && j == int(BEQ) {
+				Instr = ControlROM[JMP]
 			}
 			idx := i<<12 + j*16
 			copy(Ucode[idx:], Instr[:])

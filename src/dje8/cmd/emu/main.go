@@ -11,42 +11,23 @@ import (
 	"damien.live/dje8/pkg/ucodebuilder"
 )
 
-var OpCodes = [256]string{
-	"NOP", //00
-	"LDA", //01
-	"ADD", //02
-	"SUB", //03
-	"STA", //04
-	"LDI", //05
-	"JMP", //06
-	"JC ", //07
-	"JZ ", //08
-	"---", //09
-	"---", //0a
-	"---", //0b
-	"---", //0c
-	"---", //0d
-	"OUT", //0e
-	"HLT", //0f
-}
-
 var Program = []byte{ // Pre ASM Code
-	0x05, 0x01, // 0 LDI 1
-	0x0e,             // 1 OUT
-	0x02, 0x00, 0x22, // 2 ADD 34
-	0x07, 0x00, 0x20, // 3 JC 32
-	0x0e,             // 4 OUT
-	0x04, 0x00, 0x21, // 5 STA 33
-	0x01, 0x00, 0x22, // 6 LDA 34
-	0x02, 0x00, 0x21, // 7 ADD 33
-	0x07, 0x00, 0x20, // 8 JC 32
-	0x0e,             // 9 OUT
-	0x04, 0x00, 0x22, // a STA 34
-	0x01, 0x00, 0x21, // b LDA 33
-	0x06, 0x00, 0x03, // c JMP 3
-	0x0f, // d HLT 0
-	0x01, // e 1
-	0x01, // f 1
+	byte(LODI), 0x01, // 0 LODI 1
+	byte(NOP),              // 1 OUT(NOP)
+	byte(ADDA), 0x00, 0x22, // 2 ADDA 34
+	byte(BCS), 0x00, 0x20, // 3 BCS 32??
+	byte(NOP),              // 4 OUT(NOP)
+	byte(STOA), 0x00, 0x21, // 5 STOA 33
+	byte(LODA), 0x00, 0x22, // 6 LODA 34
+	byte(ADDA), 0x00, 0x21, // 7 ADDA 33
+	byte(BCS), 0x00, 0x20, // 8 BCS 32??
+	byte(NOP),              // 9 OUT(NOP)
+	byte(STOA), 0x00, 0x22, // a STOA 34
+	byte(LODA), 0x00, 0x21, // b LODA 33
+	byte(JMP), 0x00, 0x03, // c JMP 3
+	byte(HALT), // d HALT 0
+	0x01,       // e 1
+	0x01,       // f 1
 }
 
 // define registers
@@ -103,7 +84,7 @@ func main() {
 			// DataBus = 0xff
 			PrintSnapshot()
 			fmt.Println()
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 1)
 			// fmt.Scanln()
 			switch ClockPulse {
 			case 0: // FETCH
@@ -121,13 +102,13 @@ func main() {
 
 				// ***** OUT SIGNALS FIRST *****
 				// Address Bus OUT Signals
-				if ControlWord&CO2 != 0 {
+				if ControlWord&COW != 0 {
 					AddressBus = ProgramCounter
 				}
-				if ControlWord&PO2 != 0 {
+				if ControlWord&POW != 0 {
 					AddressBus = StackPointer
 				}
-				if ControlWord&RO2 != 0 {
+				if ControlWord&ROW != 0 {
 					AddressBus = uint16(MemorySpace[MemoryAddressRegister])<<8 | uint16(MemorySpace[MemoryAddressRegister+1])
 				}
 
@@ -141,28 +122,28 @@ func main() {
 				// *** ALU Start
 				var Mode ALUMode = ALUMode((ControlWord / AU0) & 0xf) // Getting just ALU flags in the lower half of one byte
 				switch Mode {
-				case NOP:
+				case ALUNOP:
 					// Any ALU mode other than NOP or CMP puts ALU contents on the data bus.
 					// Only arithmentic ALU modes and CMP load the ZCNV flags.
 					//
 					// This implementation of the emulator simply performs the arithmetic and updates the flags only
 					// on the cycles that the ALU bits are set even though the hardware implementation is likely
 					// always performing a computation.
-				case ADD:
+				case ALUADD:
 					DataBus = AddAndSetFlags(AccumulatorRegister, InternalRegister, false)
-				case SUB:
+				case ALUSUB:
 					DataBus = SubtractAndSetFlags(AccumulatorRegister, InternalRegister, false)
-				case ADC:
+				case ALUADC:
 					DataBus = AddAndSetFlags(AccumulatorRegister, InternalRegister, FlagsRegister&CarryFlagC != 0)
-				case SBC:
+				case ALUSBC:
 					DataBus = SubtractAndSetFlags(AccumulatorRegister, InternalRegister, FlagsRegister&CarryFlagC != 0)
-				case AND:
+				case ALUAND:
 					DataBus = AccumulatorRegister & InternalRegister
-				case OR:
+				case ALUOR:
 					DataBus = AccumulatorRegister | InternalRegister
-				case NOT:
+				case ALUNOT:
 					DataBus = ^AccumulatorRegister
-				case NEG:
+				case ALUNEG:
 					DataBus = -AccumulatorRegister
 					if DataBus == 0 {
 						FlagsRegister |= ZeroFlagZ
@@ -174,7 +155,7 @@ func main() {
 					} else {
 						FlagsRegister &= (^NegativeFlagN)
 					}
-				case INC:
+				case ALUINC:
 					DataBus = AccumulatorRegister + 1
 					if DataBus < AccumulatorRegister {
 						FlagsRegister |= CarryFlagC
@@ -193,7 +174,7 @@ func main() {
 					} else {
 						FlagsRegister &= (^NegativeFlagN)
 					}
-				case DEC:
+				case ALUDEC:
 					DataBus = AccumulatorRegister - 1
 					if DataBus > AccumulatorRegister {
 						FlagsRegister |= CarryFlagC
@@ -212,17 +193,17 @@ func main() {
 					} else {
 						FlagsRegister &= (^NegativeFlagN)
 					}
-				case CMP:
+				case ALUCMP:
 					_ = SubtractAndSetFlags(AccumulatorRegister, InternalRegister, false)
 				}
 				// *** ALU End
 
 				// ***** IN SIGNALS NEXT *****
 				// Address Bus IN Signals
-				if ControlWord&CI2 != 0 {
+				if ControlWord&CIW != 0 {
 					ProgramCounter = AddressBus
 				}
-				if ControlWord&MI2 != 0 {
+				if ControlWord&MIW != 0 {
 					MemoryAddressRegister = AddressBus
 				}
 				if ControlWord&RI != 0 {
@@ -256,25 +237,25 @@ func main() {
 				if ControlWord&CU != 0 {
 					ProgramCounter++
 				}
-				if ControlWord&CU2 != 0 {
+				if ControlWord&CUW != 0 {
 					ProgramCounter += 2
 				}
 				if ControlWord&MU != 0 {
 					MemoryAddressRegister++
 				}
-				if ControlWord&MU2 != 0 {
+				if ControlWord&MUW != 0 {
 					MemoryAddressRegister += 2
 				}
 				if ControlWord&PU != 0 {
 					StackPointer++
 				}
-				if ControlWord&PU2 != 0 {
+				if ControlWord&PUW != 0 {
 					StackPointer += 2
 				}
 				if ControlWord&PD != 0 {
 					ProgramCounter--
 				}
-				if ControlWord&PD2 != 0 {
+				if ControlWord&PDW != 0 {
 					ProgramCounter -= 2
 				}
 
@@ -375,7 +356,7 @@ func PrintSnapshot() {
 	fmt.Printf("\033[%dA", EmulationHeaderPaddingSize)
 	fmt.Printf("    PC:  0x%04x             A: 0x%02x (%3d)\n", ProgramCounter, AccumulatorRegister, AccumulatorRegister)
 	fmt.Printf("    MAR: 0x%04x             B: 0x%02x (%3d)\n", MemoryAddressRegister, InternalRegister, InternalRegister)
-	fmt.Printf("    IR:  0x%02x (%3s)  Step: 0x%x   F: %s (0x%02x)\n", InstructionRegister, OpCodes[InstructionRegister], ClockPulse, formatFlagByte(FlagsRegister), uint8(FlagsRegister))
+	fmt.Printf("    IR:  0x%02x (%4s)  Step: 0x%x   F: %s (0x%02x)\n", InstructionRegister, OpCode(InstructionRegister), ClockPulse, formatFlagByte(FlagsRegister), uint8(FlagsRegister))
 	fmt.Printf("    ROM Lookup: 0b%016b (0x%04x)\n", ROMAddress, ROMAddress)
 	fmt.Printf("    Control Wd: %s\n", formatControlWord(ControlWord))
 	fmt.Print(formatControlWordLabels("                "))

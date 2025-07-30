@@ -20,61 +20,65 @@ The instruction set will be composed of instructions from the following groups.
 
 ### Data Movement
 1. Load - Load data into the Accumulator
-   - `LDI #0x42`
-   - `LDA 0x4242`
-   - `LDZ 0x42`
-   - `LDM (0x42)`
+   - `LODI 0x42` or `LOD #0x42`
+   - `LODA 0x4242` or `LOD 0x4242`
+   - `LODZ 0x42` or `LOD 0x42`
+   - `LODM 0x42` or `LOD (0x42)`
 2. Store - Store the contents of the Accumulator into memory
-   - `STA 0x4242`
-   - `STZ 0x42`
-   - `STM (0x42)`
+   - `STOA 0x4242` or `STO 0x4242`
+   - `STOZ 0x42` or `STO 0x42`
+   - `STOM 0x42` or `STO (0x42)`
 
 ### Arithmetic
 1. Add - Add to the Accumulator and put the results into the Accumulator
-   - `ADI`
-   - `ADA`
-   - `ADZ`
-   - `ADM`
+   - `ADDI 0x42` or `ADD #0x42`
+   - `ADDA 0x4242` or `ADD 0x4242`
+   - `ADDZ 0x42` or `ADD 0x42`
+   - `ADDM 0x42` or `ADD (0x42)`
 2. Subtract - Subtract from the Accumulator and put the results into the Accumulator
-   - `SBI`
-   - `SBA`
-   - `SBZ`
-   - `SBM`
+   - `SUBI 0x42` or `SUB #0x42`
+   - `SUBA 0x4242` or `SUB 0x4242`
+   - `SUBZ 0x42` or `SUB 0x42`
+   - `SUBM 0x42` or `SUB (0x42)`
 3. Add with carry - Add to the Accumulator considering the status of the carry bit and put the results into the Accumulator
-   - `ACI`
-   - `ACA`
-   - `ACZ`
-   - `ACM`
+   - `ADCI 0x42` or `ADC #0x42`
+   - `ADCA 0x4242` or `ADC 0x4242`
+   - `ADCZ 0x42` or `ADC 0x42`
+   - `ADCM 0x42` or `ADC (0x42)`
 4. Subtract with carry - Subtract from the Accumulator considering the status of the carry bit and put the results into the Accumulator
-   - `SCI`
-   - `SCA`
-   - `SCZ`
-   - `SCM`
+   - `SBCI 0x42` or `SBC #0x42`
+   - `SBCA 0x4242` or `SBC 0x4242`
+   - `SBCZ 0x42` or `SBC 0x42`
+   - `SBCM 0x42` or `SBC (0x42)`
 5. Negate - Arithmetically negate the contents of the Accumulator and put the results into the Accumulator
    - `NEG`
-6. Compare - Compare with the Accumulator and update the status flags accordingly.  The contents of the Accumulator is not changed.
-   - `CPI`
-   - `CPA`
-   - `CPZ`
-   - `CPM`
+6. Compare - Compare with the Accumulator and update the status flags accordingly. The contents of the Accumulator is not changed.
+   - `CMPI 0x42` or `CMP #0x42`
+   - `CMPA 0x4242` or `CMP 0x4242`
+   - `CMPZ 0x42` or `CMP 0x42`
+   - `CMPM 0x42` or `CMP (0x42)`
 7. Arithmetic Shift
    - `ASL`
    - `ASR`
 
 ### Logic
 1. And - Logical And with the Accumulator and put the results into the Accumulator
-   - `ANI`
-   - `ANA`
-   - `ANZ`
-   - `ANM`
+   - `ANDI 0x42` or `AND #0x42`
+   - `ANDA 0x4242` or `AND 0x4242`
+   - `ANDZ 0x42` or `AND 0x42`
+   - `ANDM 0x42` or `AND (0x42)`
 2. Or - Logical Or with the Accumulator and put the results into the Accumulator
-   - `ORI`
-   - `ORA`
-   - `ORZ`
-   - `ORM`
+   - `ORI 0x42` or `OR #0x42`
+   - `ORA 0x4242` or `OR 0x4242`
+   - `ORZ 0x42` or `OR 0x42`
+   - `ORM 0x42` or `OR (0x42)`
 3. Not - Logical Not of the Accumulator and put the results into the Accumulator
    - `NOT`
-4. (Xor) - Logical Xor with the Accumulator and put the results into the Accumulator
+4. Xor - Logical Xor with the Accumulator and put the results into the Accumulator
+   - `XORI 0x42` or `XOR #0x42`
+   - `XORA 0x4242` or `XOR 0x4242`
+   - `XORZ 0x42` or `XOR 0x42`
+   - `XORM 0x42` or `XOR (0x42)`
 5. Logical Shift
    - `LSL`
    - `LSR`
@@ -83,19 +87,21 @@ The instruction set will be composed of instructions from the following groups.
    - `ROR`
 
 ### Flow
-1. Branch - operand is a one byte (-128 to +127) offset from the current address
-   - `BCS` - Branch on Carry flag set
-   - `BCC` - Branch on Carry flag clear
-   - `BEQ` - Branch on Zero flag set (Branch if equal)
-   - `BNE` - Branch on Zero flag clear (Branch if not equal)
-   - `BMI` - Branch on Sign flag set (Branch if negative)
-   - `BPL` - Branch on Sign flag clear (Branch if not negative)
-   - `BVS` - Branch on Overflow flag set
-   - `BVC` - Branch on Overflow flag clear
+1. Branch - operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset
+   - `BCS 0x42` - Branch on Carry flag set
+   - `BCC 0x42` - Branch on Carry flag clear
+   - `BEQ 0x42` - Branch on Zero flag set (Branch if equal)
+   - `BNE 0x42` - Branch on Zero flag clear (Branch if not equal)
+   - `BMI 0x42` - Branch on Sign flag set (Branch if negative)
+   - `BPL 0x42` - Branch on Sign flag clear (Branch if not negative)
+   - `BVS 0x42` - Branch on Overflow flag set
+   - `BVC 0x42` - Branch on Overflow flag clear
 2. Jump
-   - `JMP`
+   - `JMP 0x4242` or `JMP 0x4242`
+   - `JMPZ 0x42` or `JMP 0x42`
 3. Jump to Sub Routine
-   - `JSR`
+   - `JSR 0x4242` or `JSR 0x4242`
+   - `JSRZ 0x42` or `JSR 0x42`
 4. Return from Sub Routine
    - `RTS`
 5. Interrupt
@@ -110,19 +116,19 @@ The instruction set will be composed of instructions from the following groups.
    - `CLC`
    - `CLN`
    - `CLV`
-9.  Push to Stack
-    - `PSH`
-10. Pop from Stack
+9. Push Accumulator to Stack
+    - `PUSH`
+10. Pop from Stack into Accumulator
     - `POP`
 11. Halt
-    - `HLT`
+    - `HALT`
 12. No Operation
-    - `NOP`
+    - `NOP` - Waits the maximum number of clock cycles a single instruction can take (currently 16)
 
 ### Addressing Modes
 1. **Immediate `I`** - Argument is the value of the operand
 2. **Absolute `A`** - Argument is the 16-bit memory address of the operand
-3. **ZeroPage `Z`** - Argument is the 8-bit address  (referencing the ZeroPage (`0x0000-0x00ff`)) of the operand
+3. **ZeroPage `Z`** - Argument is the 8-bit address (referencing the ZeroPage (`0x0000-0x00ff`)) of the operand
 4. **Memory Indirect `M`**- Argument is the 8-bit memory address (referencing the ZeroPage (`0x0000-0x00ff`)) of a location containing the address of the location of the operand
 
 > [!NOTE]
@@ -153,7 +159,7 @@ The instruction set will be composed of instructions from the following groups.
     ```
 
 ## Control Logic Signals
-The control signals make up the core of the logic of the processor.  Combined together, they form the microcode that makes up each one of the processor instructions.  There are 28 separate control signals and they are stored in Control ROM as 32-bit Control Words.
+The control signals make up the core of the logic of the processor. Combined together, they form the microcode that makes up each one of the processor instructions. There are 28 separate control signals and they are stored in Control ROM as 32-bit Control Words.
 
 | Signal | Name	| Purpose |
 |---|---|---|
@@ -162,23 +168,23 @@ The control signals make up the core of the logic of the processor.  Combined to
 | `0x20000000` | `AO` | Accumulator Register Out |
 | `0x10000000` | `BI` | Internal Register In |
 | `0x08000000` | `II` | Instruction Register In |
-| `0x04000000` | `CI2` | Program Counter In from Address Bus |
+| `0x04000000` | `CIW` | Program Counter In from Address Bus |
 | `0x02000000` | `CIL` | Program Counter LSB In from Data Bus |
 | `0x01000000` | `CIH` | Program Counter MSB In from Data Bus |
-| `0x00800000` | `CO2` | Program Counter Out |
+| `0x00800000` | `COW` | Program Counter Out |
 | `0x00400000` | `CU` | Program Counter Increment |
-| `0x00200000` | `CU2` | Program Counter Increment by 2 |
-| `0x00100000` | `MI2` | Memory Address Register In From Address Bus (removed MIL & MIH) |
+| `0x00200000` | `CUW` | Program Counter Increment by 2 |
+| `0x00100000` | `MIW` | Memory Address Register In From Address Bus (removed MIL & MIH) |
 | `0x00080000` | `MU` | Memory Address Register Increment |
-| `0x00040000` | `MU2` | Memory Address Register Increment by 2 |
+| `0x00040000` | `MUW` | Memory Address Register Increment by 2 |
 | `0x00020000` | `RI` | Write to Memory |
 | `0x00010000` | `RO` | Read from Memory to Data Bus |
-| `0x00008000` | `RO2` | Read 2 bytes from memory to Address Bus |
-| `0x00004000` | `PO2` | Stack Pointer Out |
+| `0x00008000` | `ROW` | Read 2 bytes from memory to Address Bus |
+| `0x00004000` | `POW` | Stack Pointer Out |
 | `0x00002000` | `PU` | Stack Pointer Increment |
-| `0x00001000` | `PU2` | Stack Pointer Increment |
+| `0x00001000` | `PUW` | Stack Pointer Increment |
 | `0x00000800` | `PD` | Stack Pointer Decrement |
-| `0x00000400` | `PD2` | Stack Pointer Decrement |
+| `0x00000400` | `PDW` | Stack Pointer Decrement |
 | `0x00000200` | `AU3` | ALU Mode Bit 3 |
 | `0x00000100` | `AU2` | ALU Mode Bit 2 |
 | `0x00000080` | `AU1` | ALU Mode Bit 1 |
@@ -205,7 +211,7 @@ The control signals make up the core of the logic of the processor.  Combined to
 | `0xFC00 - 0xFFFD` | 1 KB | Video Controller Registers / Buffer |
 | `0xFFFE - 0xFFFF` | 2 bytes | Interrupt Vector |
 
-`0xB000 - 0xBFFF`   4 KB    Video Character Buffer (80x25 @ 8-bit color)
+`0xB000 - 0xBFFF`  4 KB   Video Character Buffer (80x25 @ 8-bit color)
 
 -----
 

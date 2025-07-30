@@ -13,23 +13,23 @@ func _() {
 	_ = x[AO-536870912]
 	_ = x[BI-268435456]
 	_ = x[II-134217728]
-	_ = x[CI2-67108864]
+	_ = x[CIW-67108864]
 	_ = x[CIL-33554432]
 	_ = x[CIH-16777216]
-	_ = x[CO2-8388608]
+	_ = x[COW-8388608]
 	_ = x[CU-4194304]
-	_ = x[CU2-2097152]
-	_ = x[MI2-1048576]
+	_ = x[CUW-2097152]
+	_ = x[MIW-1048576]
 	_ = x[MU-524288]
-	_ = x[MU2-262144]
+	_ = x[MUW-262144]
 	_ = x[RI-131072]
 	_ = x[RO-65536]
-	_ = x[RO2-32768]
-	_ = x[PO2-16384]
+	_ = x[ROW-32768]
+	_ = x[POW-16384]
 	_ = x[PU-8192]
-	_ = x[PU2-4096]
+	_ = x[PUW-4096]
 	_ = x[PD-2048]
-	_ = x[PD2-1024]
+	_ = x[PDW-1024]
 	_ = x[AU3-512]
 	_ = x[AU2-256]
 	_ = x[AU1-128]
@@ -42,7 +42,7 @@ func _() {
 	_ = x[STR-1]
 }
 
-const _Control_name = "STREX0EX1EX2EX3FLAU0AU1AU2AU3PD2PDPU2PUPO2RO2RORIMU2MUMI2CU2CUCO2CIHCILCI2IIBIAOAIHLT"
+const _Control_name = "STREX0EX1EX2EX3FLAU0AU1AU2AU3PDWPDPUWPUPOWROWRORIMUWMUMIWCUWCUCOWCIHCILCIWIIBIAOAIHLT"
 
 var _Control_map = map[Control]string{
 	1:          _Control_name[0:3],

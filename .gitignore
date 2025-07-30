@@ -1,8 +1,13 @@
 # macOS Files
 .DS_Store
 
+# Temporarily ignore all KiCad
+/kicad
+
 # KiCad Files
 \#auto_saved_files\#
 _autosave*.kicad_sch
 ~*.kicad_sch.lck
 
+# Draw.io Files
+*.drawio.bkp

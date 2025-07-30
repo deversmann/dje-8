@@ -8,27 +8,27 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[NOP-0]
-	_ = x[AND-1]
-	_ = x[OR-2]
-	_ = x[NOT-3]
+	_ = x[ALUNOP-0]
+	_ = x[ALUAND-1]
+	_ = x[ALUOR-2]
+	_ = x[ALUNOT-3]
 	_ = x[X3_-4]
 	_ = x[X2_-5]
 	_ = x[X1_-6]
 	_ = x[X0_-7]
-	_ = x[ADD-8]
-	_ = x[SUB-9]
-	_ = x[ADC-10]
-	_ = x[SBC-11]
-	_ = x[NEG-12]
-	_ = x[INC-13]
-	_ = x[DEC-14]
-	_ = x[CMP-15]
+	_ = x[ALUADD-8]
+	_ = x[ALUSUB-9]
+	_ = x[ALUADC-10]
+	_ = x[ALUSBC-11]
+	_ = x[ALUNEG-12]
+	_ = x[ALUINC-13]
+	_ = x[ALUDEC-14]
+	_ = x[ALUCMP-15]
 }
 
-const _ALUMode_name = "NOPANDORNOTX3_X2_X1_X0_ADDSUBADCSBCNEGINCDECCMP"
+const _ALUMode_name = "ALUNOPALUANDALUORALUNOTX3_X2_X1_X0_ALUADDALUSUBALUADCALUSBCALUNEGALUINCALUDECALUCMP"
 
-var _ALUMode_index = [...]uint8{0, 3, 6, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47}
+var _ALUMode_index = [...]uint8{0, 6, 12, 17, 23, 26, 29, 32, 35, 41, 47, 53, 59, 65, 71, 77, 83}
 
 func (i ALUMode) String() string {
 	if i >= ALUMode(len(_ALUMode_index)-1) {
