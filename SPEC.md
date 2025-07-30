@@ -19,111 +19,96 @@
 The instruction set will be composed of instructions from the following groups.
 
 ### Data Movement
-1. Load - Load data into the Accumulator
-   - `LODI 0x42` or `LOD #0x42`
-   - `LODA 0x4242` or `LOD 0x4242`
-   - `LODZ 0x42` or `LOD 0x42`
-   - `LODM 0x42` or `LOD (0x42)`
-2. Store - Store the contents of the Accumulator into memory
-   - `STOA 0x4242` or `STO 0x4242`
-   - `STOZ 0x42` or `STO 0x42`
-   - `STOM 0x42` or `STO (0x42)`
+
+| Mnemonic | Operand Format | Total Bytes | Description | Clock cycles |
+|---|---|---|---|---|
+| `NOP` | none | 1 | Performs no action. Waits the maximum number of clock cycles a single instruction can take | 16 |
+| `STOA` | `0x4242` | 3 | Store the contents of the Accumulator into memory | xx |
+| `STOZ` | `0x42` | 2 | Store the contents of the Accumulator into memory | xx |
+| `STOM` | `0x42` | 2 | Store the contents of the Accumulator into memory | xx |
+| `LODI` | `0x42` | 2 | Load data into the Accumulator | xx |
+| `LODA` | `0x4242` | 3 | Load data into the Accumulator | xx |
+| `LODZ` | `0x42` | 2 | Load data into the Accumulator | xx |
+| `LODM` | `0x42` | 2 | Load data into the Accumulator | xx |
 
 ### Arithmetic
-1. Add - Add to the Accumulator and put the results into the Accumulator
-   - `ADDI 0x42` or `ADD #0x42`
-   - `ADDA 0x4242` or `ADD 0x4242`
-   - `ADDZ 0x42` or `ADD 0x42`
-   - `ADDM 0x42` or `ADD (0x42)`
-2. Subtract - Subtract from the Accumulator and put the results into the Accumulator
-   - `SUBI 0x42` or `SUB #0x42`
-   - `SUBA 0x4242` or `SUB 0x4242`
-   - `SUBZ 0x42` or `SUB 0x42`
-   - `SUBM 0x42` or `SUB (0x42)`
-3. Add with carry - Add to the Accumulator considering the status of the carry bit and put the results into the Accumulator
-   - `ADCI 0x42` or `ADC #0x42`
-   - `ADCA 0x4242` or `ADC 0x4242`
-   - `ADCZ 0x42` or `ADC 0x42`
-   - `ADCM 0x42` or `ADC (0x42)`
-4. Subtract with carry - Subtract from the Accumulator considering the status of the carry bit and put the results into the Accumulator
-   - `SBCI 0x42` or `SBC #0x42`
-   - `SBCA 0x4242` or `SBC 0x4242`
-   - `SBCZ 0x42` or `SBC 0x42`
-   - `SBCM 0x42` or `SBC (0x42)`
-5. Negate - Arithmetically negate the contents of the Accumulator and put the results into the Accumulator
-   - `NEG`
-6. Compare - Compare with the Accumulator and update the status flags accordingly. The contents of the Accumulator is not changed.
-   - `CMPI 0x42` or `CMP #0x42`
-   - `CMPA 0x4242` or `CMP 0x4242`
-   - `CMPZ 0x42` or `CMP 0x42`
-   - `CMPM 0x42` or `CMP (0x42)`
-7. Arithmetic Shift
-   - `ASL`
-   - `ASR`
+
+| Mnemonic | Operand Format | Total Bytes | Description | Clock cycles |
+|---|---|---|---|---|
+| `ADDI` | `0x42` | 2 | Add to the Accumulator and put the results into the Accumulator | xx |
+| `ADDA` | `0x4242` | 3 | Add to the Accumulator and put the results into the Accumulator | xx |
+| `ADDZ` | `0x42` | 2 | Add to the Accumulator and put the results into the Accumulator | xx |
+| `ADDM` | `0x42` | 2 | Add to the Accumulator and put the results into the Accumulator | xx |
+| `SUBI` | `0x42` | 2 | Subtract from the Accumulator and put the results into the Accumulator | xx |
+| `SUBA` | `0x4242` | 3 | Subtract from the Accumulator and put the results into the Accumulator | xx |
+| `SUBZ` | `0x42` | 2 | Subtract from the Accumulator and put the results into the Accumulator | xx |
+| `SUBM` | `0x42` | 2 | Subtract from the Accumulator and put the results into the Accumulator | xx |
+| `ADCI` | `0x42` | 2 | Add to the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `ADCA` | `0x4242` | 3 | Add to the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `ADCZ` | `0x42` | 2 | Add to the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `ADCM` | `0x42` | 2 | Add to the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `SBCI` | `0x42` | 2 | Subtract from the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `SBCA` | `0x4242` | 3 | Subtract from the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `SBCZ` | `0x42` | 2 | Subtract from the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `SBCM` | `0x42` | 2 | Subtract from the Accumulator considering the status of the carry bit and put the results into the Accumulator | xx |
+| `NEG` | none | 1 | Arithmetically negate the contents of the Accumulator and put the results into the Accumulator | xx |
+| `CMPI` | `0x42` | 2 | Compare with the Accumulator and update the status flags accordingly. The contents of the Accumulator is not changed. | xx |
+| `CMPA` | `0x4242` | 3 | Compare with the Accumulator and update the status flags accordingly. The contents of the Accumulator is not changed. | xx |
+| `CMPZ` | `0x42` | 2 | Compare with the Accumulator and update the status flags accordingly. The contents of the Accumulator is not changed. | xx |
+| `CMPM` | `0x42` | 2 | Compare with the Accumulator and update the status flags accordingly. The contents of the Accumulator is not changed. | xx |
+| `ASL` | none | 1 | ... | xx |
+| `ASR` | none | 1 | ... | xx |
 
 ### Logic
-1. And - Logical And with the Accumulator and put the results into the Accumulator
-   - `ANDI 0x42` or `AND #0x42`
-   - `ANDA 0x4242` or `AND 0x4242`
-   - `ANDZ 0x42` or `AND 0x42`
-   - `ANDM 0x42` or `AND (0x42)`
-2. Or - Logical Or with the Accumulator and put the results into the Accumulator
-   - `ORI 0x42` or `OR #0x42`
-   - `ORA 0x4242` or `OR 0x4242`
-   - `ORZ 0x42` or `OR 0x42`
-   - `ORM 0x42` or `OR (0x42)`
-3. Not - Logical Not of the Accumulator and put the results into the Accumulator
-   - `NOT`
-4. Xor - Logical Xor with the Accumulator and put the results into the Accumulator
-   - `XORI 0x42` or `XOR #0x42`
-   - `XORA 0x4242` or `XOR 0x4242`
-   - `XORZ 0x42` or `XOR 0x42`
-   - `XORM 0x42` or `XOR (0x42)`
-5. Logical Shift
-   - `LSL`
-   - `LSR`
-6. Rotate
-   - `ROL`
-   - `ROR`
+
+| Mnemonic | Operand Format | Total Bytes | Description | Clock cycles |
+|---|---|---|---|---|
+| `ANDI` | `0x42` | 2 | Logical And with the Accumulator and put the results into the Accumulator | xx |
+| `ANDA` | `0x4242` | 3 | Logical And with the Accumulator and put the results into the Accumulator | xx |
+| `ANDZ` | `0x42` | 2 | Logical And with the Accumulator and put the results into the Accumulator | xx |
+| `ANDM` | `0x42` | 2 | Logical And with the Accumulator and put the results into the Accumulator | xx |
+| `ORI` | `0x42` | 2 | Logical Or with the Accumulator and put the results into the Accumulator | xx |
+| `ORA` | `0x4242` | 3 | Logical Or with the Accumulator and put the results into the Accumulator | xx |
+| `ORZ` | `0x42` | 2 | Logical Or with the Accumulator and put the results into the Accumulator | xx |
+| `ORM` | `0x42` | 2 | Logical Or with the Accumulator and put the results into the Accumulator | xx |
+| `NOT` | none | 1 | Logical Not of the Accumulator and put the results into the Accumulator | xx |
+| `XORI` | `0x42` | 2 | Logical Xor with the Accumulator and put the results into the Accumulator | xx |
+| `XORA` | `0x4242` | 3 | Logical Xor with the Accumulator and put the results into the Accumulator | xx |
+| `XORZ` | `0x42` | 2 | Logical Xor with the Accumulator and put the results into the Accumulator | xx |
+| `XORM` | `0x42` | 2 | Logical Xor with the Accumulator and put the results into the Accumulator | xx |
+| `LSL` | none | 1 | Logical shift Accumulator left one bit | xx |
+| `LSR` | none | 1 | Logical shift Accumulator right one bit | xx |
+| `ROL` | none | 1 | Rotate Accumulator left one bit | xx |
+| `ROR` | none | 1 | Rotate Accumulator right one bit | xx |
 
 ### Flow
-1. Branch - operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset
-   - `BCS 0x42` - Branch on Carry flag set
-   - `BCC 0x42` - Branch on Carry flag clear
-   - `BEQ 0x42` - Branch on Zero flag set (Branch if equal)
-   - `BNE 0x42` - Branch on Zero flag clear (Branch if not equal)
-   - `BMI 0x42` - Branch on Sign flag set (Branch if negative)
-   - `BPL 0x42` - Branch on Sign flag clear (Branch if not negative)
-   - `BVS 0x42` - Branch on Overflow flag set
-   - `BVC 0x42` - Branch on Overflow flag clear
-2. Jump
-   - `JMP 0x4242` or `JMP 0x4242`
-   - `JMPZ 0x42` or `JMP 0x42`
-3. Jump to Sub Routine
-   - `JSR 0x4242` or `JSR 0x4242`
-   - `JSRZ 0x42` or `JSR 0x42`
-4. Return from Sub Routine
-   - `RTS`
-5. Interrupt
-   - `INT`
-6. Return from Interrupt
-   - `RTI`
-7. Set flags
-   - `SEI`
-8. Clear flags
-   - `CLI`
-   - `CLZ`
-   - `CLC`
-   - `CLN`
-   - `CLV`
-9. Push Accumulator to Stack
-    - `PUSH`
-10. Pop from Stack into Accumulator
-    - `POP`
-11. Halt
-    - `HALT`
-12. No Operation
-    - `NOP` - Waits the maximum number of clock cycles a single instruction can take (currently 16)
+
+| Mnemonic | Operand Format | Total Bytes | Description | Clock cycles |
+|---|---|---|---|---|
+| `BCS` | `0x42` | 2 | Branch on Carry flag set. Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `BCC` | `0x42` | 2 | Branch on Carry flag clear. Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `BEQ` | `0x42` | 2 | Branch on Zero flag set (Branch if equal). Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `BNE` | `0x42` | 2 | Branch on Zero flag clear (Branch if not equal). Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `BMI` | `0x42` | 2 | Branch on Sign flag set (Branch if negative). Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `BPL` | `0x42` | 2 | Branch on Sign flag clear (Branch if not negative). Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `BVS` | `0x42` | 2 | Branch on Overflow flag set. Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `BVC` | `0x42` | 2 | Branch on Overflow flag clear. Operand is a one byte signed offset (-128 to +127) from the address of the byte containing the offset. | xx |
+| `JMP` | `0x4242` | 3 | Jump | xx |
+| `JMPZ` | `0x42` | 2 | Jump to location on ZeroPage | xx |
+| `JSR` | `0x4242` | 3 | Jump to Sub Routine | xx |
+| `JSRZ` | `0x42` | 2 | Jump to Sub Routine on ZeroPage | xx |
+| `RTS` | none | 1 | Return from Sub Routine | xx |
+| `INT` | none | 1 | Interrupt | xx |
+| `RTI` | none | 1 | Return from Interrupt | xx |
+| `SEI` | none | 1 | Set Interrupt Disable flag | xx |
+| `CLI` | none | 1 | Clear Interrupt Disable flag | xx |
+| `CLZ` | none | 1 | Clear Zero flag | xx |
+| `CLC` | none | 1 | Clear Carry flag | xx |
+| `CLN` | none | 1 | Clear Sign flag | xx |
+| `CLV` | none | 1 | Clear Overflow flag | xx |
+| `PUSH` | none | 1 | Push Accumulator to Stack | xx |
+| `POP` | none | 1 | Pop from Stack into Accumulator | xx |
+| `HALT` | none | 1 | ... | xx |
 
 ### Addressing Modes
 1. **Immediate `I`** - Argument is the value of the operand
