@@ -11,11 +11,11 @@ func _() {
 	_ = x[ALUNOP-0]
 	_ = x[ALUAND-1]
 	_ = x[ALUOR-2]
-	_ = x[ALUNOT-3]
-	_ = x[X3_-4]
-	_ = x[X2_-5]
-	_ = x[X1_-6]
-	_ = x[X0_-7]
+	_ = x[ALUXOR-3]
+	_ = x[ALUNOT-4]
+	_ = x[ALUX2_-5]
+	_ = x[ALUX1_-6]
+	_ = x[ALUX0_-7]
 	_ = x[ALUADD-8]
 	_ = x[ALUSUB-9]
 	_ = x[ALUADC-10]
@@ -26,9 +26,9 @@ func _() {
 	_ = x[ALUCMP-15]
 }
 
-const _ALUMode_name = "ALUNOPALUANDALUORALUNOTX3_X2_X1_X0_ALUADDALUSUBALUADCALUSBCALUNEGALUINCALUDECALUCMP"
+const _ALUMode_name = "ALUNOPALUANDALUORALUXORALUNOTALUX2_ALUX1_ALUX0_ALUADDALUSUBALUADCALUSBCALUNEGALUINCALUDECALUCMP"
 
-var _ALUMode_index = [...]uint8{0, 6, 12, 17, 23, 26, 29, 32, 35, 41, 47, 53, 59, 65, 71, 77, 83}
+var _ALUMode_index = [...]uint8{0, 6, 12, 17, 23, 29, 35, 41, 47, 53, 59, 65, 71, 77, 83, 89, 95}
 
 func (i ALUMode) String() string {
 	if i >= ALUMode(len(_ALUMode_index)-1) {

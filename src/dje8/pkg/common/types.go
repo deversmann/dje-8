@@ -78,11 +78,11 @@ const (
 	ALUNOP    ALUMode  = iota // 0000 no output
 	ALUAND                    // 0001 bitwise and
 	ALUOR                     // 0010 bitwise or
-	ALUNOT                    // 0011 bitwise inversion
-	X3_                       // 0100 reserved
-	X2_                       // 0101 reserved
-	X1_                       // 0110 reserved
-	X0_                       // 0111 reserved
+	ALUXOR                    // 0011 bitwise xor
+	ALUNOT                    // 0100 bitwise inversion
+	ALUX2_                    // 0101 reserved
+	ALUX1_                    // 0110 reserved
+	ALUX0_                    // 0111 reserved
 	ALUADD                    // 1000 add
 	ALUSUB                    // 1001 subtract
 	ALUADC                    // 1010 add considering carry flag
