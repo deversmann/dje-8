@@ -1,11 +1,5 @@
 package main
 
-// TODO :
-//   1. label pointers (the second half of labels)
-//	 2. label arithmetic i.e. `JMP label+2`
-//   3. strings in data i.e. `stringvar: 'Hello, World!',0`
-//   4. operand checking
-
 import (
 	"flag"
 	"fmt"
@@ -47,31 +41,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
 		os.Exit(1)
 	}
-	// Convert the byte slice to a string and split by lines and tokenize
-	err = TokenizeLines(strings.Split(string(data), "\n"))
-	if err != nil {
-		fmt.Printf("problem parsing file: %e\n", err)
-		os.Exit(1)
-	}
 
-	// debug out
-	for k, v := range labelMap {
-		fmt.Printf("label %s = 0x%04x\n", k, v)
-	}
-
-	if mode == 'x' {
-		printHexDump()
-	}
-	if mode == 'b' {
-		writeBinFile()
-	}
-
-}
-
-func TokenizeLines(lines []string) error {
 	var fields []string
 	var numOperandBytesRemaining int
-	for _, line := range lines {
+	for _, line := range strings.Split(string(data), "\n") {
 		fields = append(fields, strings.Fields(strings.Split(line, ";")[0])...)
 	}
 	token := AsmToken{}
@@ -80,8 +53,10 @@ func TokenizeLines(lines []string) error {
 			labelMap[strings.Trim(field, ":")] = uint16(len(tokens))
 		} else if isOpCode(field) {
 			// TODO hone error checking of operand length
+
 			if numOperandBytesRemaining > 0 {
-				return fmt.Errorf("not enough bytes before next opcode (%s) at byte %d", field, currentByte)
+				fmt.Printf("not enough bytes before next opcode (%s) at byte %d\n", field, currentByte)
+				os.Exit(1)
 			}
 			token.Val = byte(common.OpCodeLookup[field])
 			numOperandBytesRemaining = numberOfOperandBytes(common.OpCodeLookup[field])
@@ -91,38 +66,103 @@ func TokenizeLines(lines []string) error {
 			//    update bytesremaining if necessary
 			//    store the byte or bytes separately creating new tokens
 			isTwoBytes := false
-			if strings.HasPrefix(field, "0x") && (len(field) > 4) {
-				isTwoBytes = true
-			}
-			data, err := strconv.ParseUint(field, 0, 16)
-			if err != nil {
-				return fmt.Errorf("error parsing data byte %d = '%s' : %e", currentByte, field, err)
-			}
-			if data > 255 {
-				isTwoBytes = true
-			}
-			if !isTwoBytes {
-				numOperandBytesRemaining--
-				token.Val = byte(data)
+			if strings.HasPrefix(field, "'") {
+				if !strings.HasSuffix(field, "'") || len(field) != 3 {
+					fmt.Printf("error parsing character literal '%s' at byte %d\n", field, currentByte)
+					os.Exit(1)
+				}
+				charStr := strings.Trim(field, "'")
+				token.Val = charStr[0]
 				token = nextToken(token)
 			} else {
-				numOperandBytesRemaining -= 2
-				token.Val = byte(data >> 8)
-				token = nextToken(token)
-				token.Val = byte(data & 0xff)
-				token = nextToken(token)
-			}
-			if numOperandBytesRemaining < 0 {
-				numOperandBytesRemaining = 0
+				if strings.HasPrefix(field, "0x") && (len(field) > 4) {
+					isTwoBytes = true
+
+				}
+				data, err := strconv.ParseUint(field, 0, 16)
+				if err != nil {
+					fmt.Printf("error parsing data byte %d = '%s' : %e\n", currentByte, field, err)
+					os.Exit(1)
+				}
+				if data > 255 {
+					isTwoBytes = true
+				}
+				if !isTwoBytes {
+					numOperandBytesRemaining--
+					token.Val = byte(data)
+					token = nextToken(token)
+
+				} else {
+					numOperandBytesRemaining -= 2
+					token.Val = byte(data & 0xff) // little endian
+					token = nextToken(token)
+					token.Val = byte(data >> 8)
+					token = nextToken(token)
+
+				}
+				if numOperandBytesRemaining < 0 {
+					numOperandBytesRemaining = 0
+				}
 			}
 		} else {
 			// default: the field is a pointer to a label
 			//   store it in the token for the second pass
-			token.Pointer = field
-			token = nextToken(token)
+			if strings.ContainsAny(field, "<>") {
+				token = nextToken(token)
+			} else {
+				token.Pointer = "<" + field // little endian
+				token = nextToken(token)
+				token.Pointer = ">" + field
+				token = nextToken(token)
+			}
 		}
 	}
-	return nil
+
+	// Convert the byte slice to a string and split by lines and tokenize
+	for i := range len(tokens) {
+		pointer := tokens[i].Pointer
+		if len(pointer) > 0 {
+			var isHi, isPlus, isMinus bool
+			var offset string
+			pointer, isHi = strings.CutPrefix(pointer, ">")
+			if !isHi {
+				pointer, _ = strings.CutPrefix(pointer, "<")
+			}
+			pointer, offset, isPlus = strings.Cut(pointer, "+")
+			if !isPlus {
+				pointer, offset, isMinus = strings.Cut(pointer, "-")
+			}
+			address := labelMap[pointer]
+			if isPlus {
+				plus, err := strconv.ParseUint(offset, 0, 16)
+				if err != nil {
+					fmt.Printf("problem parsing offset '%s': %e\n", offset, err)
+					os.Exit(1)
+				}
+				address += uint16(plus)
+			} else if isMinus {
+				minus, err := strconv.ParseUint(offset, 0, 16)
+				if err != nil {
+					fmt.Printf("problem parsing offset '%s': %e\n", offset, err)
+					os.Exit(1)
+				}
+				address -= uint16(minus)
+			}
+			if isHi {
+				tokens[i].Val = byte(address >> 8)
+			} else {
+				tokens[i].Val = byte(address & 0xff)
+			}
+		}
+	}
+
+	if mode == 'x' {
+		printHexDump()
+	}
+	if mode == 'b' {
+		writeBinFile()
+	}
+
 }
 
 func nextToken(token AsmToken) AsmToken {
@@ -140,11 +180,11 @@ func isOpCode(token string) bool {
 	return valid
 }
 
-// Raw data is decimal, hex prefixed with 0x, or a single-quoted character
+// Raw data is decimal, octal or hex prefixed with 0x, or a single-quoted character
 // TODO - if the character resolves to multi-byte, we could have a problem
 // TODO - need an easy way to store strings of characters (0 terminated)
 func isRawData(token string) bool {
-	result, err := regexp.MatchString("^([0-9]+)|(0x[0-9A-Fa-f]+)|('.')$", token)
+	result, err := regexp.MatchString("^([+-]?(0|[1-9][0-9]*))|(0[0-7]+)|(0x[0-9A-Fa-f]+)|('.')$", token)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "You broke the REGEXP again, apparently: %e\n", err)
 		os.Exit(1)

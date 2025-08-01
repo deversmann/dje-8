@@ -5,15 +5,16 @@
 ## Overview
 ### Goals
 * Minicomputer designed to be built with TTL/CMOS 74xx series chips
-* 8-bit data width
-* 16-bit address bus = 64k addressable memory
+* 8-bit data width (0 to 255 or -128 to 127)
+* 16-bit address bus (64k addressable memory)
 * Accessible via a Serial or UART connection
+* An assembly language definition and an assembler specification
 * Rudimentary bootloader and OS
-* File system and storage
+* Minimal file system and storage
 
 ### Stretch Goals
-* Memory banking to extend usable memory
 * Integrated video output and keyboard input
+* Memory banking to extend usable memory
 
 ## Instruction Set Architecture **DRAFT**
 The instruction set will be composed of instructions from the following groups.
