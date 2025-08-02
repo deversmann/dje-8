@@ -13,14 +13,21 @@ import (
 	"damien.live/dje8/pkg/common"
 )
 
-type AsmToken struct {
-	Pointer string
-	Val     byte
+type asmToken struct {
+	value   byte
+	pointer string
+	lineNo  uint16
 }
 
-var labelMap = make(map[string]uint16)
-var tokens []AsmToken
-var currentByte uint16
+type field struct {
+	content string
+	lineNo  uint16
+}
+
+var tokens []asmToken
+var fields []field
+var currentAddress uint16 = 0
+var labelMap map[string]uint16 = make(map[string]uint16)
 
 var filename string
 var paddedSize int = 0
@@ -28,209 +35,150 @@ var paddingByte ByteValue = 0x00
 var mode ModeValue = 'x'
 
 func main() {
-	// parse args... only requirement is filename
-	flag.Parse()
+	flag.Parse() // parse args... only requirement is filename
 	if strings.TrimSpace(filename) == "" {
-		fmt.Fprintf(os.Stderr, "Error: filename required\n")
-		os.Exit(1)
+		die("Error: filename required\n")
 	}
 
-	// Read the file into a byte slice
-	data, err := os.ReadFile(filename)
+	fileBytes, err := os.ReadFile(filename) // read file
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
-		os.Exit(1)
+		die(fmt.Sprintf("Problem reading file: %e\n", err))
 	}
-
-	var fields []string
-	var numOperandBytesRemaining int
-	for _, line := range strings.Split(string(data), "\n") {
-		fields = append(fields, strings.Fields(strings.Split(line, ";")[0])...)
+	for i, lineStr := range strings.Split(string(fileBytes), "\n") { // parse into fields
+		for fieldStr := range strings.FieldsSeq(strings.ReplaceAll(strings.Split(lineStr, ";")[0], ",", " ")) {
+			fields = append(fields, field{fieldStr, uint16(i + 1)})
+		}
 	}
-	token := AsmToken{}
-	for _, field := range fields {
-		if isLabel(field) {
-			labelMap[strings.Trim(field, ":")] = uint16(len(tokens))
-		} else if isOpCode(field) {
-			// TODO hone error checking of operand length
-
-			if numOperandBytesRemaining > 0 {
-				fmt.Printf("not enough bytes before next opcode (%s) at byte %d\n", field, currentByte)
-				os.Exit(1)
-			}
-			token.Val = byte(common.OpCodeLookup[field])
-			numOperandBytesRemaining = numberOfOperandBytes(common.OpCodeLookup[field])
-			token = nextToken(token)
-		} else if isRawData(field) {
-			// if the field is a byte or word:
-			//    update bytesremaining if necessary
-			//    store the byte or bytes separately creating new tokens
-			isTwoBytes := false
-			if strings.HasPrefix(field, "'") {
-				if !strings.HasSuffix(field, "'") || len(field) != 3 {
-					fmt.Printf("error parsing character literal '%s' at byte %d\n", field, currentByte)
-					os.Exit(1)
-				}
-				charStr := strings.Trim(field, "'")
-				token.Val = charStr[0]
-				token = nextToken(token)
-			} else {
-				if strings.HasPrefix(field, "0x") && (len(field) > 4) {
-					isTwoBytes = true
-
-				}
-				data, err := strconv.ParseUint(field, 0, 16)
+	for i := 0; i < len(fields); i++ { // first pass process each field except label pointers; map label addresses
+		currentField := fields[i]
+		if strings.HasPrefix(currentField.content, "#") { // DIRECTIVE
+			if currentField.content == "#org" {
+				isStartingDirective := (i == 0)
+				i++
+				currentField = fields[i]
+				address, err := strconv.ParseUint(currentField.content, 0, 16)
 				if err != nil {
-					fmt.Printf("error parsing data byte %d = '%s' : %e\n", currentByte, field, err)
-					os.Exit(1)
+					die(fmt.Sprintf("error parsing #org directive address (%s) on line %d: %e\n", currentField.content, currentField.lineNo, err))
 				}
-				if data > 255 {
-					isTwoBytes = true
+				if !isStartingDirective {
+					if uint16(address) < currentAddress {
+						die(fmt.Sprintf("invalid #org directive on line %d, would result in a negative offset\n", currentField.lineNo))
+					}
+					tokens = append(tokens, make([]asmToken, uint16(address)-currentAddress)...) // padding
 				}
-				if !isTwoBytes {
-					numOperandBytesRemaining--
-					token.Val = byte(data)
-					token = nextToken(token)
-
-				} else {
-					numOperandBytesRemaining -= 2
-					token.Val = byte(data & 0xff) // little endian
-					token = nextToken(token)
-					token.Val = byte(data >> 8)
-					token = nextToken(token)
-
+				currentAddress = uint16(address)
+			} else {
+				die(fmt.Sprintf("unknown assembler directive (%s) on line %d\n", currentField.content, currentField.lineNo))
+			}
+		} else if strings.HasSuffix(currentField.content, ":") { // LABEL
+			labelMap[currentField.content[:len(currentField.content)-1]] = currentAddress
+		} else if _, found := common.OpCodeLookup[currentField.content]; found { // INSTRUCTION
+			tokens = append(tokens, asmToken{byte(common.OpCodeLookup[currentField.content]), "", currentField.lineNo})
+			currentAddress++
+		} else if isData(currentField.content) {
+			if strings.HasPrefix(currentField.content, "'") {
+				tokens = append(tokens, asmToken{[]byte(currentField.content)[1], "", currentField.lineNo})
+				currentAddress++
+			} else {
+				isTwoBytes := (strings.HasPrefix(currentField.content, "0x") && len(currentField.content) > 4)
+				parsed, err := strconv.ParseUint(currentField.content, 0, 16)
+				if err != nil {
+					die(fmt.Sprintf("error parsing data (%s) at line %d: %e\n", currentField.content, currentField.lineNo, err))
 				}
-				if numOperandBytesRemaining < 0 {
-					numOperandBytesRemaining = 0
+				isTwoBytes = isTwoBytes || parsed > 255
+				tokens = append(tokens, asmToken{byte(parsed), "", currentField.lineNo}) // one byte or LSB
+				currentAddress++
+				if isTwoBytes {
+					tokens = append(tokens, asmToken{byte(parsed >> 8), "", currentField.lineNo}) // MSB
+					currentAddress++
 				}
 			}
-		} else {
-			// default: the field is a pointer to a label
-			//   store it in the token for the second pass
-			if strings.ContainsAny(field, "<>") {
-				token = nextToken(token)
+		} else { // must be pointer
+			if strings.ContainsAny(currentField.content, "<>") {
+				tokens = append(tokens, asmToken{0, currentField.content, currentField.lineNo})
+				currentAddress++
 			} else {
-				token.Pointer = "<" + field // little endian
-				token = nextToken(token)
-				token.Pointer = ">" + field
-				token = nextToken(token)
+				tokens = append(tokens, []asmToken{{0, "<" + currentField.content, currentField.lineNo}, {0, ">" + currentField.content, currentField.lineNo}}...)
+				currentAddress += 2
 			}
 		}
 	}
 
-	// Convert the byte slice to a string and split by lines and tokenize
-	for i := range len(tokens) {
-		pointer := tokens[i].Pointer
-		if len(pointer) > 0 {
-			var isHi, isPlus, isMinus bool
-			var offset string
-			pointer, isHi = strings.CutPrefix(pointer, ">")
-			if !isHi {
-				pointer, _ = strings.CutPrefix(pointer, "<")
-			}
-			pointer, offset, isPlus = strings.Cut(pointer, "+")
-			if !isPlus {
-				pointer, offset, isMinus = strings.Cut(pointer, "-")
-			}
-			address := labelMap[pointer]
-			if isPlus {
-				plus, err := strconv.ParseUint(offset, 0, 16)
+	for i := range len(tokens) { // second pass, replace labell pointers with addresses of labels
+		pointer := tokens[i].pointer
+		if pointer != "" {
+			offsetIdx := strings.LastIndexAny(pointer, "+-")
+			isMSB := strings.HasPrefix(pointer, ">")
+			var offset int64
+			var err error
+			if offsetIdx > 0 {
+				offset, err = strconv.ParseInt(pointer[offsetIdx:], 0, 16)
 				if err != nil {
-					fmt.Printf("problem parsing offset '%s': %e\n", offset, err)
-					os.Exit(1)
+					die(fmt.Sprintf("error parsing pointer (%s) at line %d: %e\n", tokens[i].pointer, tokens[i].lineNo, err))
 				}
-				address += uint16(plus)
-			} else if isMinus {
-				minus, err := strconv.ParseUint(offset, 0, 16)
-				if err != nil {
-					fmt.Printf("problem parsing offset '%s': %e\n", offset, err)
-					os.Exit(1)
-				}
-				address -= uint16(minus)
+				pointer = pointer[:offsetIdx]
 			}
-			if isHi {
-				tokens[i].Val = byte(address >> 8)
+			address, found := labelMap[pointer[1:]]
+			if !found {
+				die(fmt.Sprintf("error parsing pointer (%s) at line %d: %e\n", pointer[1:], tokens[i].lineNo, err))
+			}
+			address += uint16(offset)
+			if isMSB {
+				tokens[i].value = byte(address >> 8)
 			} else {
-				tokens[i].Val = byte(address & 0xff)
+				tokens[i].value = byte(address)
 			}
 		}
 	}
 
 	if mode == 'x' {
-		printHexDump()
+		chars := ""
+		for i, token := range tokens {
+			if i%16 == 0 {
+				fmt.Printf("%08x ", i)
+			}
+			fmt.Printf(" %02x", token.value)
+			if unicode.IsPrint(rune(token.value)) {
+				chars = chars + string(token.value)
+			} else {
+				chars = chars + "."
+			}
+			if (i+1)%8 == 0 {
+				fmt.Print(" ")
+			}
+			if (i+1)%16 == 0 || i == len(tokens)-1 {
+				fmt.Printf(" \033[61G|%s|\n", chars)
+				chars = ""
+			}
+		}
+		fmt.Printf("%08x\n", len(tokens))
 	}
+
 	if mode == 'b' {
-		writeBinFile()
+		var bytes []byte
+		for _, token := range tokens {
+			bytes = append(bytes, token.value)
+		}
+		if len(bytes) < paddedSize {
+			for i := len(bytes); i < paddedSize; i++ {
+				bytes = append(bytes, byte(paddingByte))
+			}
+		}
+		os.WriteFile(strings.Join([]string{filename, ".bin"}, ""), bytes, fs.ModePerm)
 	}
-
 }
 
-func nextToken(token AsmToken) AsmToken {
-	tokens = append(tokens, token)
-	currentByte++
-	return AsmToken{}
-}
-
-func isLabel(token string) bool {
-	return strings.HasSuffix(token, ":")
-}
-
-func isOpCode(token string) bool {
-	_, valid := common.OpCodeLookup[token]
-	return valid
-}
-
-// Raw data is decimal, octal or hex prefixed with 0x, or a single-quoted character
-// TODO - if the character resolves to multi-byte, we could have a problem
-// TODO - need an easy way to store strings of characters (0 terminated)
-func isRawData(token string) bool {
-	result, err := regexp.MatchString("^([+-]?(0|[1-9][0-9]*))|(0[0-7]+)|(0x[0-9A-Fa-f]+)|('.')$", token)
+func isData(field string) bool {
+	matched, err := regexp.MatchString("^(('.')|([+-]?(0|[1-9][0-9]*))|(0[0-7]*)|(0x[0-9a-fA-F]*))$", field)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "You broke the REGEXP again, apparently: %e\n", err)
-		os.Exit(1)
+		die(fmt.Sprintf("regular expression to match numerics is in error: %e", err))
 	}
-	return result
+	return matched
 }
 
-func numberOfOperandBytes(op common.OpCode) int {
-	// TODO
-	return 0
-}
-
-func writeBinFile() {
-	var bytes []byte
-	for _, token := range tokens {
-		bytes = append(bytes, token.Val)
-	}
-	if len(bytes) < paddedSize {
-		for i := len(bytes); i < paddedSize; i++ {
-			bytes = append(bytes, byte(paddingByte))
-		}
-	}
-	os.WriteFile(strings.Join([]string{filename, ".bin"}, ""), bytes, fs.ModePerm)
-}
-
-func printHexDump() {
-	var printedBytes []byte
-	for i, token := range tokens {
-		if i%16 == 0 {
-			fmt.Printf("%08x  ", i)
-		}
-		fmt.Printf("%02x ", token.Val)
-		if unicode.IsPrint(rune(token.Val)) {
-			printedBytes = append(printedBytes, token.Val)
-		} else {
-			printedBytes = append(printedBytes, '.')
-		}
-		if (i+1)%8 == 0 {
-			fmt.Print(" ")
-		}
-		if (i+1)%16 == 0 || i+1 == len(tokens) {
-			fmt.Printf("\033[61G|%s|\n", string(printedBytes))
-			printedBytes = []byte{}
-		}
-	}
-	fmt.Printf("%08x\n", len(tokens))
+func die(message string) {
+	fmt.Fprintln(os.Stderr, message)
+	os.Exit(1)
 }
 
 // *** CLI FLag Stuff ***
@@ -255,6 +203,7 @@ func init() {
 func (v *ByteValue) String() string {
 	return strconv.FormatUint(uint64(*v), 16)
 }
+
 func (v *ByteValue) Set(s string) error {
 	if temp, err := strconv.ParseUint(s, 0, 8); err != nil {
 		return err
@@ -263,9 +212,11 @@ func (v *ByteValue) Set(s string) error {
 	}
 	return nil
 }
+
 func (v *ModeValue) String() string {
 	return string(*v)
 }
+
 func (v *ModeValue) Set(s string) error {
 	if strings.HasPrefix(s, "X") || strings.HasPrefix(s, "x") {
 		*v = 'x'

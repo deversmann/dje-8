@@ -23,9 +23,9 @@
        1.  A reference takes 1 bytes if it is prepended with a less than (`<`) or greater than (`>`) symbol.  These indicate only loading the low byte or high byte of the address respectively.
        2.  Label references may also have a plus (`+`) or minus (`-`) appended with a number signifying an number of offset bytes after or before the memory location respectively. The symbol and the number are appended without spaces (`label+4`) and the offset is applied before applying a byte selection.
 10. `#org` followed an address is a directive that sets the memory location of the following bytes. 
-    1.  If the use of the directive creates a gap after the preceeding code, that space will be filled  with 0x00. 
+    1.  If the use of the directive creates a gap after the preceeding code, that space will be filled with 0x00. 
     2.  `#org` cannot move backward.  
-    3.  If the directive is the first non-comment, non-whitespace token, it is understood to be the starting point of the assembly and all following bytes will be numbered from that point. 
+    3.  If the directive is the first non-comment, non-whitespace token, it is understood to be the starting point of the assembly and all following bytes and addresses will be numbered from that point. 
     4.  `#org` and its address must appear on their own line with the exception of a label that immediately follows an `#org` directive.  This label will refer to the memory location named by the directive. 
 
 ### TODOs
