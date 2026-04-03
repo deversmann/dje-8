@@ -17,12 +17,15 @@ func main() {
 
 	for i, ControlWord := range Ucode {
 		if i%16 == 0 {
-			fmt.Printf("\n0x%04x:", i)
+			fmt.Printf("\n%04x: ", i)
 		}
-		if ControlWord == 0 {
-			fmt.Print(" 0x0")
-		} else {
-			fmt.Printf(" 0x%08x", uint32(ControlWord))
+		// if ControlWord == 0 {
+		// 	fmt.Print(" 0")
+		// } else {
+		fmt.Printf(" %08x", uint32(ControlWord))
+		// }
+		if (i+1)%4 == 0 {
+			fmt.Print(" ")
 		}
 	}
 

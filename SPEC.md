@@ -137,11 +137,11 @@ The instruction set will be composed of instructions from the following groups.
     ```
     - - - I Z C N V
           | | | | |
-          | | | | +-- Overflow Flag 
-          | | | +---- Sign Flag 
-          | | +------ Carry Flag 
-          | +-------- Zero Flag 
-          +---------- Interrupt Disable Flag 
+          | | | | `-- Overflow Flag 
+          | | | `---- Sign Flag 
+          | | `------ Carry Flag 
+          | `-------- Zero Flag 
+          `---------- Interrupt Disable Flag 
     ```
 
 ## Control Logic Signals

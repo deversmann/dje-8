@@ -44,9 +44,9 @@ func main() {
 	if err != nil {
 		die(fmt.Sprintf("Problem reading file: %e\n", err))
 	}
-	for i, lineStr := range strings.Split(string(fileBytes), "\n") { // parse into fields
-		for fieldStr := range strings.FieldsSeq(strings.ReplaceAll(strings.Split(lineStr, ";")[0], ",", " ")) {
-			fields = append(fields, field{fieldStr, uint16(i + 1)})
+	for i, lineStr := range strings.Split(string(fileBytes), "\n") { // separate into lines
+		for fieldStr := range strings.FieldsSeq(strings.ReplaceAll(strings.Split(lineStr, ";")[0], ",", " ")) { // remove comments and commas
+			fields = append(fields, field{fieldStr, uint16(i + 1)}) // separate into fields
 		}
 	}
 	for i := 0; i < len(fields); i++ { // first pass process each field except label pointers; map label addresses
@@ -104,7 +104,7 @@ func main() {
 		}
 	}
 
-	for i := range len(tokens) { // second pass, replace labell pointers with addresses of labels
+	for i := range len(tokens) { // second pass, replace label pointers with addresses of labels
 		pointer := tokens[i].pointer
 		if pointer != "" {
 			offsetIdx := strings.LastIndexAny(pointer, "+-")

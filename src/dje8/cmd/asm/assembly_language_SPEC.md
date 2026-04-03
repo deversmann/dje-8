@@ -26,10 +26,10 @@
     1.  If the use of the directive creates a gap after the preceeding code, that space will be filled with 0x00. 
     2.  `#org` cannot move backward.  
     3.  If the directive is the first non-comment, non-whitespace token, it is understood to be the starting point of the assembly and all following bytes and addresses will be numbered from that point. 
-    4.  `#org` and its address must appear on their own line with the exception of a label that immediately follows an `#org` directive.  This label will refer to the memory location named by the directive. 
+    4.  A label that immediately follows an `#org` directive will refer to the memory location named by the directive. 
 
 ### TODOs
 - [x] Implement octal and character literals
-- [ ] Implementation of directives, e.g. `#org`
+- [x] Implementation of directives, e.g. `#org`
 - [ ] Definition and implementation of strings in ASM, e.g. `'this is a zero terminated string', 0`
 - [ ] Implement operand length checking, i.e. are enough bytes included after each instruction?
